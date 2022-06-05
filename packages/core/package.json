@@ -1,5 +1,5 @@
 {
-  "name": "@imooc-clil-dev-x1/core",
+  "name": "@imooc-cli-dev-x1/core",
   "version": "0.0.2",
   "description": "> TODO: description",
   "author": "king <jake2020520@gmail.com>",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@imooc-cli-dev-x1/utils": "^0.0.2"
   },
-  "gitHead": "715adc45e33aee2e1e7336272926fc61133c8efc",
+  "gitHead": "2bcedb499f53ca4630bb8d10d5cdd28bfc2245ac",
   "publishConfig": {
     "access": "public"
   }
