@@ -20,11 +20,13 @@
     "type": "git",
     "url": "https://gitee.com/XUDESONG/learn.git"
   },
+  "dependencies": {
+    "@imooc-cli-dev-x1/log": "file:../../utils/log",
+    "@imooc-cli-dev-x1/utils": "file:../../utils/utils",
+    "import-local": "^3.1.0"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "dependencies": {
-    "@imooc-cli-dev-x1/utils": "^0.0.3"
   },
   "gitHead": "2bcedb499f53ca4630bb8d10d5cdd28bfc2245ac",
   "publishConfig": {
