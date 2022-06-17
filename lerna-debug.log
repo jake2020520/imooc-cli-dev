@@ -1,0 +1,9 @@
+0 silly argv {
+0 silly argv   _: [ 'create' ],
+0 silly argv   lernaVersion: '5.0.0',
+0 silly argv   '$0': 'lerna',
+0 silly argv   name: '@imooc-cli-dev-x1/init'
+0 silly argv }
+1 notice cli v5.0.0
+2 verbose rootPath /Users/king/Documents/imooc-cli-dev
+3 error
