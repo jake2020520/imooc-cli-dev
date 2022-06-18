@@ -9,35 +9,38 @@ const pathExists = require("path-exists").sync;
 const commander = require("commander");
 const init = require("@imooc-cli-dev-x1/init");
 const log = require("@imooc-cli-dev-x1/log");
+const exec = require("@imooc-cli-dev-x1/exec");
 const pkg = require("../package.json");
 const constant = require("./const");
 
 const program = new commander.Command();
 let args, config;
-// // 检查传入的参数
-// checkInputArgs();
 
 async function core() {
   try {
-    // 打印package里面的版本号
-    checkPkgVersion();
-    // 比对node 版本
-    checkNodeVersion();
-    // 超级管理员权限降级 root sudo
-    checkRoot();
-    // 检查用户的主目录 或是否存在
-    checkUserHome();
-    // 检查传入的参数， 设置打印日志级别
-    // checkInputArgs();
-    log.verbose("debug", "test debug log");
-    // 配置环境变量
-    checkEnv();
-    //  检查软件的更新
-    await checkGlobalUpdate();
+    prepare(); // 前期准备
     registerCommand();
   } catch (e) {
     log.error(e.message);
   }
+}
+
+async function prepare() {
+  // 打印package里面的版本号
+  checkPkgVersion();
+  // 比对node 版本
+  checkNodeVersion();
+  // 超级管理员权限降级 root sudo
+  checkRoot();
+  // 检查用户的主目录 或是否存在
+  checkUserHome();
+  // 检查传入的参数， 设置打印日志级别
+  // checkInputArgs();
+  // log.verbose("debug", "test debug log");
+  // 配置环境变量
+  checkEnv();
+  //  检查软件的更新
+  await checkGlobalUpdate();
 }
 
 function registerCommand() {
@@ -51,12 +54,13 @@ function registerCommand() {
     .name(Object.keys(pkg.bin)[0])
     .version(pkg.version)
     .usage("<command> [option]")
-    .option("-d, --debug", "开启调试模式", false);
+    .option("-d, --debug", "开启调试模式", false)
+    .option("-tp --targetPath <targetPath>", "是否指定本地调试文件路径", "");
 
   program
     .command("init [projectName]")
     .option("-f, --force", "是否强制初始化")
-    .action(init);
+    .action(exec);
 
   /**
    * @description 实现 debug 模式
@@ -72,6 +76,13 @@ function registerCommand() {
     }
     log.level = process.env.LOG_LEVEL;
     log.verbose("test");
+  });
+  /**
+   * @description 设置全局变量
+   * 本地调试文件的路径
+   */
+  program.on("option:targetPath", function () {
+    process.env.CLI_TARGET_PATH = program.targetPath;
   });
 
   /**
@@ -138,8 +149,9 @@ function checkEnv() {
     });
   }
   createDefaultConfig();
-  log.verbose(
+  console.log(
     "环境变量",
+    dotenvPath,
     config,
     process.env.DB_PWD,
     process.env.CLI_HOME_PATH
@@ -156,24 +168,6 @@ function createDefaultConfig() {
     cliConfig["cliHome"] = path.join(userHome, constant.DEFAULT_CLI_HOME);
   }
   process.env.CLI_HOME_PATH = cliConfig["cliHome"];
-}
-
-function checkInputArgs() {
-  // 处理process 参数,把参数变成了对象
-  const minimist = require("minimist");
-  args = minimist(process.argv.slice(2));
-  // console.log("args: ", args);
-  checkArgs();
-}
-
-function checkArgs() {
-  // 设置日志的级别
-  if (args.debug) {
-    process.env.LOG_LEVEL = "verbose";
-  } else {
-    process.env.LOG_LEVEL = "info";
-  }
-  log.level = process.env.LOG_LEVEL;
 }
 
 function checkUserHome() {
@@ -206,3 +200,21 @@ function checkNodeVersion() {
     );
   }
 }
+
+// function checkInputArgs() {
+//   // 处理process 参数,把参数变成了对象
+//   const minimist = require("minimist");
+//   args = minimist(process.argv.slice(2));
+//   // console.log("args: ", args);
+//   checkArgs();
+// }
+
+// function checkArgs() {
+//   // 设置日志的级别
+//   if (args.debug) {
+//     process.env.LOG_LEVEL = "verbose";
+//   } else {
+//     process.env.LOG_LEVEL = "info";
+//   }
+//   log.level = process.env.LOG_LEVEL;
+// }

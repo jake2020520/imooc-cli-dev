@@ -53,6 +53,7 @@ function getSemverVersions(baseVersion, versions = []) {
 async function getNpmSemverVersion(baseVersion, npmName, registry) {
   const versions = await getNpmVersions(npmName, registry);
   // console.log("versions: ", versions);
+  // TODO: 便于本地调试
   //   const newVersions = getSemverVersions(baseVersion, versions);
   const newVersions = getSemverVersions(baseVersion, [
     "1.0.5",
