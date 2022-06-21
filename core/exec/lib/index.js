@@ -62,7 +62,13 @@ async function exec() {
   console.log(111111, rootFile);
   if (rootFile) {
     // console.log("---arguments--", arguments);
-    require(rootFile)(Array.from(arguments));
+    // 异步的，重新catch
+    // 每新建 promise,都要重新 监听catch,才能监听错误
+    try {
+      require(rootFile)(Array.from(arguments));
+    } catch (e) {
+      log.error(e.message);
+    }
   }
 
   // log.verbose("targetPath: ", targetPath);

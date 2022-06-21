@@ -27,6 +27,7 @@
     "url": "https://github.com/jake2020520/imooc-cli-dev/issues"
   },
   "dependencies": {
-    "@imooc-cli-dev-x1/command": "file:../../models/command"
+    "@imooc-cli-dev-x1/command": "file:../../models/command",
+    "@imooc-cli-dev-x1/log": "file:../../utils/log"
   }
 }

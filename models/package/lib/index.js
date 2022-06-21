@@ -16,7 +16,7 @@ class Package {
     if (!options) {
       throw new Error("package类的options 参数不能为空");
     }
-    console.log("package constructor", options);
+    // console.log("package constructor", options);
     if (!isObject(options)) {
       throw new Error("package类的options 必须为对象");
     }
