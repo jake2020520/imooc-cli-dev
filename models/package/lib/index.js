@@ -1,5 +1,5 @@
 "use strict";
-const npminstall = require("npminstall");
+const npminstall = require("npminstall"); //npminstall 安装
 const path = require("path");
 const fse = require("fs-extra");
 const pathExists = require("path-exists").sync;
