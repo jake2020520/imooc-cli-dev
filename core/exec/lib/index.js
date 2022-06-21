@@ -61,7 +61,8 @@ async function exec() {
   const rootFile = pkg.getRootFilePath();
   console.log(111111, rootFile);
   if (rootFile) {
-    require(rootFile)(...arguments);
+    // console.log("---arguments--", arguments);
+    require(rootFile)(Array.from(arguments));
   }
 
   // log.verbose("targetPath: ", targetPath);

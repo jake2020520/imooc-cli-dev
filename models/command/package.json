@@ -1,7 +1,7 @@
 {
-  "name": "@imooc-cli-dev-x1/init",
+  "name": "@imooc-cli-dev-x1/command",
   "version": "0.0.3",
-  "description": "imooc-cli-dev-x1 init",
+  "description": "imooc-cli-dev-x1 command",
   "author": "king <jake2020520@gmail.com>",
   "homepage": "https://github.com/jake2020520/imooc-cli-dev#readme",
   "license": "ISC",
@@ -27,6 +27,8 @@
     "url": "https://github.com/jake2020520/imooc-cli-dev/issues"
   },
   "dependencies": {
-    "@imooc-cli-dev-x1/command": "file:../../models/command"
+    "@imooc-cli-dev-x1/log": "file:../../utils/log",
+    "colors": "^1.4.0",
+    "semver": "^7.3.7"
   }
 }

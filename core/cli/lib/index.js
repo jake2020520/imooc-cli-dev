@@ -31,8 +31,7 @@ async function core() {
 async function prepare() {
   // 打印package里面的版本号
   checkPkgVersion();
-  // 比对node 版本
-  checkNodeVersion();
+
   // 超级管理员权限降级 root sudo
   checkRoot();
   // 检查用户的主目录 或是否存在
@@ -190,18 +189,6 @@ function checkRoot() {
 
 function checkPkgVersion() {
   log.notice("cli", pkg.version);
-}
-
-function checkNodeVersion() {
-  // 第一步 获取当前node 版本
-  const currentVersion = process.version;
-  const lowestVersion = constant.LOWEST_NODE_VERSION;
-  // 第二步，对比最低版本号
-  if (!semver.gte(currentVersion, lowestVersion)) {
-    throw new Error(
-      colors.red(`imooc-cli 需要按照V${lowestVersion}以上版本 Node`)
-    );
-  }
 }
 
 // function checkInputArgs() {
