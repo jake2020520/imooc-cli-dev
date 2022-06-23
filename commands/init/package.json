@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "@imooc-cli-dev-x1/command": "file:../../models/command",
-    "@imooc-cli-dev-x1/log": "file:../../utils/log"
+    "@imooc-cli-dev-x1/log": "file:../../utils/log",
+    "inquirer": "^7.3.3",
+    "fs-extra": "^9.0.1"
   }
 }

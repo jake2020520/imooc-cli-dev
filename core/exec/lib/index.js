@@ -1,5 +1,6 @@
 "use strict";
 const path = require("path");
+const cp = require("child_process");
 const log = require("@imooc-cli-dev-x1/log");
 const Package = require("@imooc-cli-dev-x1/package");
 
@@ -65,7 +66,26 @@ async function exec() {
     // 异步的，重新catch
     // 每新建 promise,都要重新 监听catch,才能监听错误
     try {
-      require(rootFile)(Array.from(arguments));
+      // require(rootFile)(Array.from(arguments));
+      // 多进程
+      const args = Array.from(arguments).slice(0, arguments.length - 1);
+      const cmd = args[args.length - 1];
+      const o = Object.create(null);
+      Object.keys(cmd).forEach((key) => {
+        if (
+          cmd.hasOwnProperty(key) &&
+          !key.startsWith("_") &&
+          key !== "parent"
+        ) {
+          o[key] = cmd[key];
+        }
+      });
+      args[args.length - 1] = o;
+      const code = `require('${rootFile}')(${JSON.stringify(args)})`;
+      const child = cp.spawn("node", ["-e", code], {
+        cwd: process.cwd(),
+        stdio: "inherit",
+      });
     } catch (e) {
       log.error(e.message);
     }
