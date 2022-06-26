@@ -6,6 +6,7 @@ const inquirer = require("inquirer");
 const semver = require("semver"); // 版本号对比
 const fse = require("fs-extra");
 const log = require("@imooc-cli-dev-x1/log"); // 颜色
+const { spinnerStart, sleep } = require("@imooc-cli-dev-x1/utils"); // 颜色
 const Command = require("@imooc-cli-dev-x1/command");
 const Package = require("@imooc-cli-dev-x1/package");
 
@@ -37,6 +38,11 @@ class InitCommand extends Command {
   }
 
   async downLoadTemplate() {
+    // 1.通过项目模板api获取项目模板信息
+    // 2.通过egg.js搭建一套后端系统
+    // 3. 通过npm存储项目模板
+    // 4.将项目模板信息存储到mongodb数据库中
+    // 5.通过egg.js获取mongodb中的数据并且通过api返回
     console.log("downLoadTemplate info: ", this.template, this.projectInfo);
     const { projectTemplate } = this.projectInfo;
     const templateInfo = this.template.find(
@@ -49,7 +55,6 @@ class InitCommand extends Command {
       "template",
       "node_modules"
     );
-    console.log("--downLoadTemplate-", targetPath, storeDir);
     const { npmName, version } = templateInfo;
     const templateNpm = new Package({
       targetPath,
@@ -57,18 +62,32 @@ class InitCommand extends Command {
       packageName: npmName,
       packageVersion: version,
     });
-    if (!templateNpm.exists()) {
-      await templateNpm.install();
+    if (!(await templateNpm.exists())) {
+      const spinner = spinnerStart("正在下载模板...");
+      await sleep();
+      try {
+        await templateNpm.install();
+        log.success("下载模板成功");
+      } catch (e) {
+        throw e;
+      } finally {
+        spinner.stop(true);
+      }
+      // await templateNpm.install();
+      // spinner.stop(true);
+      // log.success("下载模板成功");
     } else {
-      await templateNpm.update();
+      const spinner = spinnerStart("正在更新模板...");
+      await sleep();
+      try {
+        await templateNpm.update();
+        log.success("更新模板成功");
+      } catch (e) {
+        throw e;
+      } finally {
+        spinner.stop(true);
+      }
     }
-    // 1.通过项目模板api获取项目模板信息
-    // 2.通过egg.js搭建一套后端系统
-    // 3. 通过npm存储项目模板
-    // 4.将项目模板信息存储到mongodb数据库中
-    // 5.通过egg.js获取mongodb中的数据并且通过api返回
-    //
-    //
   }
 
   async prepare() {
