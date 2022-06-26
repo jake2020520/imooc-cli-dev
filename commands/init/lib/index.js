@@ -1,10 +1,13 @@
 "use strict";
 const fs = require("fs");
+const path = require("path");
+const userHome = require("user-home");
 const inquirer = require("inquirer");
 const semver = require("semver"); // 版本号对比
 const fse = require("fs-extra");
 const log = require("@imooc-cli-dev-x1/log"); // 颜色
 const Command = require("@imooc-cli-dev-x1/command");
+const Package = require("@imooc-cli-dev-x1/package");
 
 const getProjectTemplate = require("./getProjectTemplate");
 
@@ -25,7 +28,7 @@ class InitCommand extends Command {
       if (projectInfo) {
         this.projectInfo = projectInfo;
         // 2.下载模板
-        this.downLoadTemplate();
+        await this.downLoadTemplate();
         // 3.安装模板
       }
     } catch (e) {
@@ -33,8 +36,32 @@ class InitCommand extends Command {
     }
   }
 
-  downLoadTemplate() {
+  async downLoadTemplate() {
     console.log("downLoadTemplate info: ", this.template, this.projectInfo);
+    const { projectTemplate } = this.projectInfo;
+    const templateInfo = this.template.find(
+      (template) => template.npmName === projectTemplate
+    );
+    const targetPath = path.resolve(userHome, ".imooc-cli-dev", "template");
+    const storeDir = path.resolve(
+      userHome,
+      ".imooc-cli-dev",
+      "template",
+      "node_modules"
+    );
+    console.log("--downLoadTemplate-", targetPath, storeDir);
+    const { npmName, version } = templateInfo;
+    const templateNpm = new Package({
+      targetPath,
+      storeDir,
+      packageName: npmName,
+      packageVersion: version,
+    });
+    if (!templateNpm.exists()) {
+      await templateNpm.install();
+    } else {
+      await templateNpm.update();
+    }
     // 1.通过项目模板api获取项目模板信息
     // 2.通过egg.js搭建一套后端系统
     // 3. 通过npm存储项目模板
@@ -45,9 +72,8 @@ class InitCommand extends Command {
   }
 
   async prepare() {
-    // 0. 判断模板是否存在
+    // 0. 判断模板是否存在 数据中获取
     const template = await getProjectTemplate();
-    console.log("-template:--", template);
     if (!template || template.length === 0) {
       throw new Error("项目模板不存在");
     }
@@ -181,7 +207,6 @@ class InitCommand extends Command {
       value: item.npmName,
       name: item.name,
     }));
-    console.log("-createTemplateChoice-", data);
     return data;
   }
 

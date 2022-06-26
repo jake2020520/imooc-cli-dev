@@ -30,8 +30,10 @@
     "@imooc-cli-dev-x1/command": "file:../../models/command",
     "@imooc-cli-dev-x1/log": "file:../../utils/log",
     "@imooc-cli-dev-x1/request": "file:../../utils/request",
+    "@imooc-cli-dev-x1/package": "file:../../models/package",
     "inquirer": "^7.3.3",
     "fs-extra": "^9.0.1",
-    "semver": "^7.3.7"
+    "semver": "^7.3.7",
+    "user-home": "^3.0.0"
   }
 }

@@ -30,7 +30,7 @@ async function exec() {
     // 生成缓存路径
     targetPath = path.resolve(homePath, CACHE_DIR);
     storeDir = path.resolve(targetPath, "node_modules");
-    log.verbose("targetPath:no ", targetPath);
+    log.verbose("targetPath:no ", homePath, CACHE_DIR, targetPath);
     log.verbose("storeDir: ", storeDir);
     pkg = new Package({
       targetPath,
