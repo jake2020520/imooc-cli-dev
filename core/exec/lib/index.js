@@ -18,9 +18,7 @@ async function exec() {
     pkg;
 
   // TODO
-
   const cmdObj = arguments[arguments.length - 1];
-
   const cdmName = cmdObj.name(); //cmdObj._name 也可以取到
   console.log("arguments:cdmName ", cdmName); // init
   const packageName = SETTINGS[cdmName];
