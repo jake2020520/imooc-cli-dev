@@ -7,14 +7,12 @@ const colors = require("colors/safe"); // 颜色
 const userHome = require("user-home");
 const pathExists = require("path-exists").sync;
 const commander = require("commander");
-const init = require("@imooc-cli-dev-x1/init");
 const log = require("@imooc-cli-dev-x1/log");
 const exec = require("@imooc-cli-dev-x1/exec");
 const pkg = require("../package.json");
 const constant = require("./const");
 
 const program = new commander.Command();
-let args, config;
 
 async function core() {
   try {
@@ -23,7 +21,7 @@ async function core() {
   } catch (e) {
     log.error(e.message);
     if (program.debug) {
-      console.log(e);
+      console.log("core: ", e);
     }
   }
 }
@@ -70,14 +68,13 @@ function registerCommand() {
    * 方法二： 调用 on 方法监听 option:debug
    */
   program.on("option:debug", () => {
-    console.log("debug: ", program.debug);
     if (program.debug) {
       process.env.LOG_LEVEL = "verbose";
     } else {
       process.env.LOG_LEVEL = "info";
     }
     log.level = process.env.LOG_LEVEL;
-    log.verbose("test");
+    log.verbose("log.verbose设置测试");
   });
   /**
    * @description 设置全局变量
@@ -91,7 +88,6 @@ function registerCommand() {
    * @description 监听未知的命令
    */
   program.on("command:*", (obj) => {
-    console.log(obj);
     console.error("未知的命令：", obj[0]);
     // 获取所有已注册的命令
     const availableCommands = program.commands.map((cmd) => cmd.name());
@@ -100,7 +96,6 @@ function registerCommand() {
   // 没有 命令 或 找不到的命令  提醒帮助文档
   // if (program.args && program.args.length < 1) {
   if (process.argv.length < 3) {
-    console.log("-----", program);
     program.outputHelp();
     console.log();
   }
@@ -115,13 +110,8 @@ async function checkGlobalUpdate() {
   const currentVersion = "1.1.1";
   const npmName = pkg.name;
   // 2. 调用npm API ，获取所有版本号
-  const {
-    getNpmInfo,
-    getNpmVersions,
-    getNpmSemverVersion,
-  } = require("@imooc-cli-dev-x1/get-npm-info");
+  const { getNpmSemverVersion } = require("@imooc-cli-dev-x1/get-npm-info");
   const lastVersion = await getNpmSemverVersion(currentVersion, npmName);
-  // console.log("---newVersion-", lastVersion);
   if (lastVersion && semver.gt(lastVersion, currentVersion)) {
     log.warn(
       colors.yellow(`请手动更新${npmName},当前版本：${currentVersion},最新版本：${lastVersion}
@@ -138,6 +128,7 @@ function checkEnv() {
   const curDotenvPath = path.resolve(__filename, "../../", ".env");
   // 拿到 .env里面配置的变量
   // console.log("dotenvPath: ", dotenvPath, curDotenvPath);
+  let config;
   // 视频讲解的
   if (pathExists(dotenvPath)) {
     config = dotenv.config({
@@ -166,7 +157,6 @@ function createDefaultConfig() {
 }
 
 function checkUserHome() {
-  // console.log("userHome: ", userHome);
   if (!userHome || !pathExists(userHome)) {
     throw new Error(colors.red("当前登录用户主目录不存在"));
   }
@@ -177,11 +167,10 @@ function checkRoot() {
   const rootCheck = require("root-check");
   rootCheck();
   // 超级管理员 是 0 ，降级后是501
-  console.log(process.geteuid());
 }
 
 function checkPkgVersion() {
-  log.notice("cli", pkg.version);
+  log.notice("cli version: ", pkg.version);
 }
 
 // function checkInputArgs() {

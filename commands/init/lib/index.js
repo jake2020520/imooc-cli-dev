@@ -58,7 +58,7 @@ class InitCommand extends Command {
   }
 
   async installTemplate() {
-    console.log("installTemplate: ", this.templateInfo);
+    log.verbose("installTemplate: ", this.templateInfo);
     if (this.templateInfo) {
       if (!this.templateInfo.type) {
         this.templateInfo.type = TEMPLATE_TYPE_NORMAL;
@@ -98,7 +98,7 @@ class InitCommand extends Command {
   }
 
   async installNormalTemplate() {
-    console.log("安装标准模板");
+    log.verbose("安装标准模板");
     let spinner = spinnerStart("正在安装模板...");
     await sleep();
     try {
@@ -110,7 +110,7 @@ class InitCommand extends Command {
       fse.ensureDirSync(templatePath);
       fse.ensureDirSync(targetPath);
       fse.copySync(templatePath, targetPath);
-      log.verbose("缓存路径 目的路径:", templatePath, targetPath);
+      // log.verbose("缓存路径 目的路径:", templatePath, targetPath);
     } catch (e) {
       throw e;
     } finally {

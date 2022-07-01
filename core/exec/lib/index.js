@@ -1,6 +1,5 @@
 "use strict";
 const path = require("path");
-const cp = require("child_process");
 const log = require("@imooc-cli-dev-x1/log");
 const { exec: spawn } = require("@imooc-cli-dev-x1/utils");
 const Package = require("@imooc-cli-dev-x1/package");
@@ -21,7 +20,6 @@ async function exec() {
   // TODO
   const cmdObj = arguments[arguments.length - 1];
   const cdmName = cmdObj.name(); //cmdObj._name 也可以取到
-  console.log("arguments:cdmName ", cdmName); // init
   const packageName = SETTINGS[cdmName];
   const packageVersion = "latest";
   // const packageVersion = "1.1.0";
@@ -41,15 +39,13 @@ async function exec() {
     });
     if (await pkg.exists()) {
       // 更新
-      console.log("更新package: --", await pkg.exists());
       await pkg.update();
     } else {
       // 安装
-      console.log("按照package: --");
       await pkg.install();
     }
   } else {
-    log.verbose("targetPath:yes ", targetPath);
+    log.verbose("targetPath: ", targetPath);
     pkg = new Package({
       targetPath,
       storeDir,
@@ -59,7 +55,7 @@ async function exec() {
   }
 
   const rootFile = pkg.getRootFilePath();
-  console.log(111111, rootFile);
+  log.verbose("rootFile", rootFile);
   if (rootFile) {
     // console.log("---arguments--", arguments);
     // 异步的，重新catch
@@ -89,10 +85,6 @@ async function exec() {
       log.error(e.message);
     }
   }
-
-  // log.verbose("targetPath: ", targetPath);
-  // log.verbose("homePath: ", homePath);
-  // log.verbose("homePath: ", homePath);
 }
 
 module.exports = exec;
