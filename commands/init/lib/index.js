@@ -106,7 +106,6 @@ class InitCommand extends Command {
   ejsRender(option) {
     const dir = process.cwd();
     const projectInfo = this.projectInfo;
-    console.log("projectInfo:  ", projectInfo);
     return new Promise((resolve, reject) => {
       glob(
         "**",
@@ -115,7 +114,6 @@ class InitCommand extends Command {
           if (err) {
             reject(err);
           }
-          console.log("file: ", files);
           Promise.all(
             files.map((file) => {
               const filePath = path.join(dir, file);
@@ -166,7 +164,6 @@ class InitCommand extends Command {
       await this.ejsRender({ ignore });
       // 依赖安装
       const { installCommand, startCommand } = this.templateInfo;
-      console.log("--templateInfo--------");
       await this.execCommand(installCommand, "依赖安装异常");
       // 启动命令执行
       await this.execCommand(startCommand, "命令启动失败");
@@ -292,7 +289,17 @@ class InitCommand extends Command {
     return this.getProjectInfo();
   }
   async getProjectInfo() {
+    function isValidName(v) {
+      return /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
+        v
+      );
+    }
     let projectInfo = {};
+    let isProjectNameValid = false;
+    if (isValidName(this.projectName)) {
+      isProjectNameValid = true;
+      projectInfo.projectName = this.projectName;
+    }
     // 1.选择创建项目和组件
     const { type } = await inquirer.prompt({
       type: "list",
@@ -306,36 +313,36 @@ class InitCommand extends Command {
     });
     log.verbose("type", type);
     if (type === TYPE_PROJECT) {
+      let projectPrompt = [];
       // 2.获取项目的基本信息
-      const project = await inquirer.prompt([
-        {
-          type: "input",
-          name: "projectName",
-          default: "",
-          validate: function (v) {
-            // 1.输入的首位字符
-            // 2.尾字符必须为英文字符或者数字，不能为字符
-            // 3. 字符仅允许“-_”
-            const done = this.async();
-            // Do async stuff
-            setTimeout(function () {
-              if (
-                !/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
-                  v
-                )
-              ) {
-                // Pass the return value in the done callback
-                done("请输入合法的项目名称，例:a1_a1_a1");
-                return;
-              }
+      const projectNamePrompt = {
+        type: "input",
+        name: "projectName",
+        default: "",
+        validate: function (v) {
+          // 1.输入的首位字符
+          // 2.尾字符必须为英文字符或者数字，不能为字符
+          // 3. 字符仅允许“-_”
+          const done = this.async();
+          // Do async stuff
+          setTimeout(function () {
+            if (!isValidName(v)) {
               // Pass the return value in the done callback
-              done(null, true);
-            }, 0);
-          },
-          filter: function (v) {
-            return v;
-          },
+              done("请输入合法的项目名称，例:a1_a1_a1");
+              return;
+            }
+            // Pass the return value in the done callback
+            done(null, true);
+          }, 0);
         },
+        filter: function (v) {
+          return v;
+        },
+      };
+      if (!isProjectNameValid) {
+        projectPrompt.push(projectNamePrompt);
+      }
+      projectPrompt.push(
         {
           type: "input",
           name: "projectVersion",
@@ -369,9 +376,10 @@ class InitCommand extends Command {
           name: "projectTemplate",
           message: "请选择项目模板",
           choices: this.createTemplateChoice(),
-        },
-      ]);
-      projectInfo = { type, ...project };
+        }
+      );
+      const project = await inquirer.prompt(projectPrompt);
+      projectInfo = { ...projectInfo, type, ...project };
     } else if (type === TYPE_COMPONENT) {
     }
     // 生成 classname
