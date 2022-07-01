@@ -96,7 +96,7 @@ class Package {
     // 2、查询最新的版本号对应的路径是否存在
     const latestFilePath = this.getSpecificCacheFilePath(latestPackageVersion);
     // 3、如果不存在，直接按照最新的
-    this.packageVersion = latestPackageVersion;
+
     if (!pathExists(latestFilePath)) {
       await npminstall({
         root: this.targetPath,
@@ -104,6 +104,9 @@ class Package {
         registry: getDefaultRegistry(),
         pkgs: [{ name: this.packageName, version: latestPackageVersion }],
       });
+      this.packageVersion = latestPackageVersion;
+    } else {
+      this.packageVersion = latestPackageVersion;
     }
     return latestFilePath;
   }

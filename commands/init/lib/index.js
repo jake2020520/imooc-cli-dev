@@ -11,6 +11,9 @@ const Command = require("@imooc-cli-dev-x1/command");
 const Package = require("@imooc-cli-dev-x1/package");
 const { exec, execAsync } = require("@imooc-cli-dev-x1/utils");
 
+const glob = require("glob");
+const ejs = require("ejs");
+
 const getProjectTemplate = require("./getProjectTemplate");
 
 const TYPE_PROJECT = "project";
@@ -54,6 +57,9 @@ class InitCommand extends Command {
       }
     } catch (e) {
       log.error(e.message);
+      if (process.env.LOG_LEVEL === "verbose") {
+        console.log(e);
+      }
     }
   }
 
@@ -97,6 +103,46 @@ class InitCommand extends Command {
     }
   }
 
+  ejsRender(option) {
+    const dir = process.cwd();
+    const projectInfo = this.projectInfo;
+    console.log("projectInfo:  ", projectInfo);
+    return new Promise((resolve, reject) => {
+      glob(
+        "**",
+        { cwd: dir, ignore: option.ignore, nodir: true },
+        (err, files) => {
+          if (err) {
+            reject(err);
+          }
+          console.log("file: ", files);
+          Promise.all(
+            files.map((file) => {
+              const filePath = path.join(dir, file);
+              return new Promise((resolve1, reject1) => {
+                ejs.renderFile(filePath, projectInfo, {}, (err, res) => {
+                  // console.log("renderFile", err, res);
+                  if (err) {
+                    reject1(err);
+                  } else {
+                    fse.writeFileSync(filePath, res);
+                    resolve1(res);
+                  }
+                });
+              })
+                .then(() => {
+                  resolve();
+                })
+                .catch((err) => {
+                  reject1(err);
+                });
+            })
+          );
+        }
+      );
+    });
+  }
+
   async installNormalTemplate() {
     log.verbose("安装标准模板");
     let spinner = spinnerStart("正在安装模板...");
@@ -116,11 +162,14 @@ class InitCommand extends Command {
     } finally {
       spinner.stop(true);
       log.success("模板安装成功");
+      const ignore = ["node_modules/**", "public/**"];
+      await this.ejsRender({ ignore });
       // 依赖安装
       const { installCommand, startCommand } = this.templateInfo;
+      console.log("--templateInfo--------");
       await this.execCommand(installCommand, "依赖安装异常");
-      await this.execCommand(startCommand, "命令执行失败");
       // 启动命令执行
+      await this.execCommand(startCommand, "命令启动失败");
     }
   }
   async installCustomTemplate() {
@@ -324,6 +373,15 @@ class InitCommand extends Command {
       ]);
       projectInfo = { type, ...project };
     } else if (type === TYPE_COMPONENT) {
+    }
+    // 生成 classname
+    if (projectInfo.projectName) {
+      projectInfo.className = require("kebab-case")(
+        projectInfo.projectName
+      ).replace(/^-/, "");
+    }
+    if (projectInfo.projectVersion) {
+      projectInfo.version = projectInfo.projectVersion;
     }
     return projectInfo;
     //

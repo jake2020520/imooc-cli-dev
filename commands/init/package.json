@@ -34,7 +34,10 @@
     "@imooc-cli-dev-x1/utils": "file:../../utils/utils",
     "fs-extra": "^9.0.1",
     "inquirer": "^7.3.3",
+    "kebab-case": "^1.0.1",
     "semver": "^7.3.7",
-    "user-home": "^3.0.0"
+    "user-home": "^3.0.0",
+    "ejs": "^2.7.4",
+    "glob": "^8.0.3"
   }
 }
