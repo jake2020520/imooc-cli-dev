@@ -5,8 +5,8 @@ const log = require("@imooc-cli-dev-x1/log");
 const Package = require("@imooc-cli-dev-x1/package");
 
 const SETTINGS = {
-  // init: "@imooc-cli-dev-x1/init",
-  init: "@imooc-cli/init",
+  init: "@imooc-cli-dev-x1/init",
+  // init: "@imooc-cli/init",
 };
 
 const CACHE_DIR = "dependencies/";
