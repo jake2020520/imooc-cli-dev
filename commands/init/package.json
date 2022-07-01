@@ -1,6 +1,6 @@
 {
   "name": "@imooc-cli-dev-x1/init",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "imooc-cli-dev-x1 init",
   "author": "king <jake2020520@gmail.com>",
   "homepage": "https://github.com/jake2020520/imooc-cli-dev#readme",
@@ -32,12 +32,12 @@
     "@imooc-cli-dev-x1/package": "file:../../models/package",
     "@imooc-cli-dev-x1/request": "file:../../utils/request",
     "@imooc-cli-dev-x1/utils": "file:../../utils/utils",
+    "ejs": "^2.7.4",
     "fs-extra": "^9.0.1",
+    "glob": "^8.0.3",
     "inquirer": "^7.3.3",
     "kebab-case": "^1.0.1",
     "semver": "^7.3.7",
-    "user-home": "^3.0.0",
-    "ejs": "^2.7.4",
-    "glob": "^8.0.3"
+    "user-home": "^3.0.0"
   }
 }
