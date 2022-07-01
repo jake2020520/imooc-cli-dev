@@ -9,6 +9,7 @@ const log = require("@imooc-cli-dev-x1/log"); // 颜色
 const { spinnerStart, sleep } = require("@imooc-cli-dev-x1/utils"); // 颜色
 const Command = require("@imooc-cli-dev-x1/command");
 const Package = require("@imooc-cli-dev-x1/package");
+const { exec, execAsync } = require("@imooc-cli-dev-x1/utils");
 
 const getProjectTemplate = require("./getProjectTemplate");
 
@@ -16,6 +17,22 @@ const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "component";
 const TEMPLATE_TYPE_NORMAL = "normal";
 const TEMPLATE_TYPE_CUSTOM = "custom";
+const WHITE_COMMAND = ["npm", "cnpm"];
+const PROJECT_INFO = [
+  {
+    name: "vue2标注模板",
+    npmName: "template-xu-vue2",
+    version: "1.0.0",
+    type: "normal",
+    installCommand: "npm install",
+    startCommand: "npm run serve",
+  },
+  {
+    name: "vue2后台管理模板",
+    npmName: "template-admin-xu-vue2",
+    version: "1.0.0",
+  },
+];
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
@@ -27,7 +44,7 @@ class InitCommand extends Command {
     try {
       // 1.准备阶段
       const projectInfo = await this.prepare();
-      log.verbose("projectInfo: ", projectInfo);
+      log.verbose("projectInfo:选中的项目 ", projectInfo);
       if (projectInfo) {
         this.projectInfo = projectInfo;
         // 2.下载模板
@@ -60,6 +77,26 @@ class InitCommand extends Command {
     }
   }
 
+  async execCommand(command, errMessage) {
+    let ret;
+    if (command) {
+      const cmdArr = command.split(" ");
+      const cmd = this.checkCommand(cmdArr[0]);
+      if (!cmd) {
+        throw new Error("命令不存在！命令：" + command);
+      }
+      const args = cmdArr.slice(1);
+      // cmd:npm args:['install']
+      ret = await execAsync(cmd, args, {
+        stdio: "inherit",
+        cwd: process.cwd(),
+      });
+      if (ret !== 0) {
+        throw new Error(errMessage);
+      }
+    }
+  }
+
   async installNormalTemplate() {
     console.log("安装标准模板");
     let spinner = spinnerStart("正在安装模板...");
@@ -73,16 +110,28 @@ class InitCommand extends Command {
       fse.ensureDirSync(templatePath);
       fse.ensureDirSync(targetPath);
       fse.copySync(templatePath, targetPath);
-      console.log("--installNormalTemplate--", templatePath, targetPath);
+      log.verbose("缓存路径 目的路径:", templatePath, targetPath);
     } catch (e) {
       throw e;
     } finally {
       spinner.stop(true);
       log.success("模板安装成功");
+      // 依赖安装
+      const { installCommand, startCommand } = this.templateInfo;
+      await this.execCommand(installCommand, "依赖安装异常");
+      await this.execCommand(startCommand, "命令执行失败");
+      // 启动命令执行
     }
   }
   async installCustomTemplate() {
     console.log("安装自定义模板");
+  }
+
+  checkCommand(cmd) {
+    if (WHITE_COMMAND.includes(cmd)) {
+      return cmd;
+    }
+    return null;
   }
 
   async downLoadTemplate() {
@@ -91,7 +140,6 @@ class InitCommand extends Command {
     // 3. 通过npm存储项目模板
     // 4.将项目模板信息存储到mongodb数据库中
     // 5.通过egg.js获取mongodb中的数据并且通过api返回
-    console.log("downLoadTemplate info: ", this.template, this.projectInfo);
     const { projectTemplate } = this.projectInfo;
     this.templateInfo = this.template.find(
       (template) => template.npmName === projectTemplate
@@ -146,7 +194,13 @@ class InitCommand extends Command {
 
   async prepare() {
     // 0. 判断模板是否存在 数据中获取
-    const template = await getProjectTemplate();
+    let template;
+    try {
+      // 目前链接的是本地数据库，其他人连接不了
+      template = await getProjectTemplate();
+    } catch (error) {
+      template = PROJECT_INFO;
+    }
     if (!template || template.length === 0) {
       throw new Error("项目模板不存在");
     }

@@ -2,6 +2,7 @@
 const path = require("path");
 const cp = require("child_process");
 const log = require("@imooc-cli-dev-x1/log");
+const { exec: spawn } = require("@imooc-cli-dev-x1/utils");
 const Package = require("@imooc-cli-dev-x1/package");
 
 const SETTINGS = {
@@ -80,7 +81,7 @@ async function exec() {
       });
       args[args.length - 1] = o;
       const code = `require('${rootFile}')(${JSON.stringify(args)})`;
-      const child = cp.spawn("node", ["-e", code], {
+      const child = spawn("node", ["-e", code], {
         cwd: process.cwd(),
         stdio: "inherit",
       });

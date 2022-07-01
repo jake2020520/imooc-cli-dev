@@ -120,7 +120,6 @@ class Package {
     function _getRootFile(targetPath) {
       // 1、获取package.json所在目录
       const dir = pkgDir(targetPath);
-      console.log("-getRootFilePath:22-", dir);
       if (dir) {
         // 2、读取 package.json
         const pkgFile = require(path.resolve(dir, "package.json"));

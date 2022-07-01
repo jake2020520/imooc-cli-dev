@@ -151,13 +151,6 @@ function checkEnv() {
     });
   }
   createDefaultConfig();
-  console.log(
-    "环境变量",
-    dotenvPath,
-    config,
-    process.env.DB_PWD,
-    process.env.CLI_HOME_PATH
-  );
 }
 
 function createDefaultConfig() {
