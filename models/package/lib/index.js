@@ -102,6 +102,7 @@ class Package {
       pathExists(latestFilePath),
       latestPackageVersion
     );
+    this.packageVersion = latestPackageVersion;
     if (!pathExists(latestFilePath)) {
       await npminstall({
         root: this.targetPath,
@@ -109,7 +110,6 @@ class Package {
         registry: getDefaultRegistry(),
         pkgs: [{ name: this.packageName, version: latestPackageVersion }],
       });
-      this.packageVersion = latestPackageVersion;
     }
     return latestFilePath;
   }

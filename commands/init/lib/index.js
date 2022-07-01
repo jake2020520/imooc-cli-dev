@@ -14,6 +14,8 @@ const getProjectTemplate = require("./getProjectTemplate");
 
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "component";
+const TEMPLATE_TYPE_NORMAL = "normal";
+const TEMPLATE_TYPE_CUSTOM = "custom";
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
@@ -31,10 +33,56 @@ class InitCommand extends Command {
         // 2.下载模板
         await this.downLoadTemplate();
         // 3.安装模板
+        await this.installTemplate();
       }
     } catch (e) {
       log.error(e.message);
     }
+  }
+
+  async installTemplate() {
+    console.log("installTemplate: ", this.templateInfo);
+    if (this.templateInfo) {
+      if (!this.templateInfo.type) {
+        this.templateInfo.type = TEMPLATE_TYPE_NORMAL;
+      }
+      if (this.templateInfo.type === TEMPLATE_TYPE_NORMAL) {
+        // 安装标注模板
+        this.installNormalTemplate();
+      } else if (this.templateInfo.type === TEMPLATE_TYPE_CUSTOM) {
+        // 安装自定义模板
+        this.installCustomTemplate();
+      } else {
+        throw new Error("无法识别项目模板");
+      }
+    } else {
+      throw new Error("项目模板信息不存在！");
+    }
+  }
+
+  async installNormalTemplate() {
+    console.log("安装标准模板");
+    let spinner = spinnerStart("正在安装模板...");
+    await sleep();
+    try {
+      const templatePath = path.resolve(
+        this.templateNpm.cacheFilePath,
+        "template"
+      );
+      const targetPath = process.cwd();
+      fse.ensureDirSync(templatePath);
+      fse.ensureDirSync(targetPath);
+      fse.copySync(templatePath, targetPath);
+      console.log("--installNormalTemplate--", templatePath, targetPath);
+    } catch (e) {
+      throw e;
+    } finally {
+      spinner.stop(true);
+      log.success("模板安装成功");
+    }
+  }
+  async installCustomTemplate() {
+    console.log("安装自定义模板");
   }
 
   async downLoadTemplate() {
@@ -45,7 +93,7 @@ class InitCommand extends Command {
     // 5.通过egg.js获取mongodb中的数据并且通过api返回
     console.log("downLoadTemplate info: ", this.template, this.projectInfo);
     const { projectTemplate } = this.projectInfo;
-    const templateInfo = this.template.find(
+    this.templateInfo = this.template.find(
       (template) => template.npmName === projectTemplate
     );
     const targetPath = path.resolve(userHome, ".imooc-cli-dev", "template");
@@ -55,7 +103,7 @@ class InitCommand extends Command {
       "template",
       "node_modules"
     );
-    const { npmName, version } = templateInfo;
+    const { npmName, version } = this.templateInfo;
     const templateNpm = new Package({
       targetPath,
       storeDir,
@@ -67,11 +115,14 @@ class InitCommand extends Command {
       await sleep();
       try {
         await templateNpm.install();
-        log.success("下载模板成功");
       } catch (e) {
         throw e;
       } finally {
         spinner.stop(true);
+        if (await templateNpm.exists()) {
+          log.success("下载模板成功");
+          this.templateNpm = templateNpm;
+        }
       }
       // await templateNpm.install();
       // spinner.stop(true);
@@ -81,11 +132,14 @@ class InitCommand extends Command {
       await sleep();
       try {
         await templateNpm.update();
-        log.success("更新模板成功");
       } catch (e) {
         throw e;
       } finally {
         spinner.stop(true);
+        if (await templateNpm.exists()) {
+          log.success("更新模板成功");
+          this.templateNpm = templateNpm;
+        }
       }
     }
   }
@@ -128,7 +182,7 @@ class InitCommand extends Command {
         });
         if (confirmDelete) {
           // 清空文件夹的操作
-          // fse.emptyDirSync(localPath);
+          fse.emptyDirSync(localPath);
         }
       }
     }
