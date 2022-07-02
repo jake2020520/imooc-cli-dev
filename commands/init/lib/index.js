@@ -154,16 +154,24 @@ class InitCommand extends Command {
       fse.ensureDirSync(templatePath);
       fse.ensureDirSync(targetPath);
       fse.copySync(templatePath, targetPath);
-      // log.verbose("缓存路径 目的路径:", templatePath, targetPath);
+      log.verbose("缓存路径 目的路径:", templatePath, targetPath);
     } catch (e) {
       throw e;
     } finally {
       spinner.stop(true);
       log.success("模板安装成功");
-      const ignore = ["node_modules/**", "public/**"];
+      const {
+        installCommand,
+        startCommand,
+        ignore: templateIgnore,
+      } = this.templateInfo;
+      console.log("--templateInfo-", this.templateInfo);
+      const templateItemIgnore = templateIgnore
+        ? templateIgnore
+        : ["**/public/**"];
+      const ignore = ["node_modules/**", ...templateItemIgnore];
       await this.ejsRender({ ignore });
       // 依赖安装
-      const { installCommand, startCommand } = this.templateInfo;
       await this.execCommand(installCommand, "依赖安装异常");
       // 启动命令执行
       await this.execCommand(startCommand, "命令启动失败");
@@ -311,7 +319,11 @@ class InitCommand extends Command {
         { name: "组件", value: TYPE_COMPONENT },
       ],
     });
-    log.verbose("type", type);
+    log.verbose("type: ", type);
+    this.template = this.template.filter((template) =>
+      template.tag.includes(type)
+    );
+
     if (type === TYPE_PROJECT) {
       let projectPrompt = [];
       // 2.获取项目的基本信息
